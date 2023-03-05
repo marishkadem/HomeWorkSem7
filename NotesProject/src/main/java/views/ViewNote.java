@@ -1,5 +1,6 @@
 package views;
 
+import controllers.IController;
 import controllers.NoteController;
 import model.Fields;
 import model.Note;
@@ -9,21 +10,21 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Scanner;
 
-public class ViewNote {
+public class ViewNote implements IViewNote{
 
-    private final NoteController noteController;
+    private IViewOperations viewOperations;
 
-    public ViewNote(NoteController noteController) {
-        this.noteController = noteController;
+    public ViewNote(IViewOperations viewOperations) {
+        this.viewOperations = viewOperations;
     }
 
     public void run(){
         boolean isContinue = true;
-        showHelp();
+        viewOperations.showHelp();
         while (isContinue){
             try{
 
-                String command = prompt("Введите команду: ");
+                String command = viewOperations.prompt("Введите команду: ");
                 Commands com = Commands.valueOf(command.toUpperCase());
                 if (com == Commands.EXIT){
                     isContinue = false;
@@ -32,22 +33,22 @@ public class ViewNote {
 
                 switch (com){
                     case CREATE:
-                        create();
+                        viewOperations.create();
                         break;
                     case READ:
-                        read();
+                        viewOperations.read();
                         break;
                     case UPDATE:
-                        update();
+                        viewOperations.update();
                         break;
                     case LIST:
-                        list();
+                        viewOperations.list();
                         break;
                     case HELP:
-                        showHelp();
+                        viewOperations.showHelp();
                         break;
                     case DELETE:
-                        delete();
+                        viewOperations.delete();
                         break;
                 }
             }catch (Exception e){
@@ -56,50 +57,6 @@ public class ViewNote {
         }
     }
 
-    private void read() throws Exception {
-        String id = prompt("Идентификатор записи: ");
-        Note note = noteController.readNote(id);
-        System.out.println(note);
-    }
 
-    private void delete() throws Exception{
-        String id = prompt("идентификатор записи: ");
-        noteController.deleteNote(id);
-    }
-
-    private void update() throws Exception {
-        String noteId = prompt("Идентификатор записи: ");
-        String fieldName = prompt("Какое поле (HEAD, TEXT): ");
-        String param = prompt("Введите на то что хотите изменить: ");
-
-        Note note = noteController.readNote(noteId);
-        noteController.updateNote(note, Fields.valueOf(fieldName.toUpperCase()), param);
-    }
-
-    private void list() throws Exception {
-        List<Note> noteList = noteController.getNotes();
-        for (Note note : noteList){
-            System.out.println(note);
-        }
-    }
-    private void create() throws Exception {
-        String head = prompt("Заголовок: ");
-        String text = prompt("Текст: ");
-
-        Note note = new Note(head, text);
-        noteController.saveNote(note);
-    }
-
-    private void showHelp() {
-        System.out.println("Список команд:");
-        for(Commands c : Commands.values()) {
-            System.out.println(c);
-        }
-    }
-    private String prompt(String message) {
-        Scanner in = new Scanner(System.in);
-        System.out.print(message);
-        return in.nextLine();
-    }
 
 }
